@@ -6,7 +6,8 @@ from datetime import timedelta, datetime
 from dateutil.parser import parse
 
 from users_app.models import Tutor, Student
-
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
 
 class Language(models.Model):
     denomination = models.CharField(max_length=20)
@@ -31,7 +32,8 @@ def update_language_field(sender, instance, **kwargs):
 
 
 class Course(models.Model):
-    language = models.ForeignKey(Language, on_delete=models.CASCADE)
+    language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True, blank=True)
+    # language = models.ForeignKey(Language, on_delete=models.CASCADE)
     level = models.CharField(max_length=2, choices=[
             ('A1', 'A1'),
             ('A2', 'A2'),
@@ -45,17 +47,14 @@ class Course(models.Model):
     # students = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
     students = models.ManyToManyField(Student, blank=True)
     date_started = models.DateTimeField()
-    duration = models.IntegerField()
+    duration = models.IntegerField(verbose_name='Duration in months')
     date_ended = models.DateTimeField()
 
     def save(self, *args, **kwargs):
         if self.date_started and self.duration:
-            duration_days = int(self.duration) * 30  # Преобразование в целое число и умножение на 30
-
-            # Предполагается, что self.date_started является строкой в формате даты и времени
-            self.date_started = parse(self.date_started)
-
-            self.date_ended = self.date_started + timedelta(days=duration_days)
+            if self.date_started and self.duration:
+                duration_days = int(self.duration) * 30
+                self.date_ended = self.date_started + timedelta(days=duration_days)
 
         super().save(*args, **kwargs)
 

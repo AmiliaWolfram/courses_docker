@@ -53,18 +53,18 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer = CourseSerializer(course)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-
-        # Convert date_started to string
-        date_started = instance.date_started.strftime('%Y-%m-%dT%H:%M:%S')
-
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(serializer.data)
+    # def perform_update(self, request, *args, **kwargs):
+    #     partial = kwargs.pop('partial', False)
+    #     instance = self.get_object()
+    #
+    #     # Convert date_started to string
+    #     date_started = instance.date_started.strftime('%Y-%m-%dT%H:%M:%S')
+    #
+    #     serializer = self.get_serializer(instance, data=request.data, partial=partial)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_update(serializer)
+    #
+    #     return Response(serializer.data)
 
 
 class LanguageViewSet(viewsets.ModelViewSet):

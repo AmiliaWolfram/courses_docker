@@ -16,7 +16,7 @@ class User(AbstractUser):
 
 class Tutor(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    students = models.ManyToManyField('Student', related_name='tutor_set', related_query_name='tutor', blank=True)
+    # students = models.ManyToManyField('Student', related_name='tutor_set', related_query_name='tutor', blank=True)
     experience = models.IntegerField()
     votes = models.IntegerField(default=0)
 

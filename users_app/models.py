@@ -18,7 +18,6 @@ class Tutor(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     # students = models.ManyToManyField('Student', related_name='tutor_set', related_query_name='tutor', blank=True)
     experience = models.IntegerField()
-    votes = models.IntegerField(default=0)
 
     @staticmethod
     def update_students(sender, instance, action, pk_set, **kwargs):
@@ -57,6 +56,22 @@ class Student(models.Model):
     def __str__(self):
         return self.user.username
 
-    def vote_for_tutor(self, tutor):
-        tutor.increment_votes()
-        self.save()
+
+class VoteType(models.Model):
+    id = models.SmallIntegerField(primary_key=True)
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+
+class Vote(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name='tutor_votes')
+    vote = models.ForeignKey('VoteType', on_delete=models.SET_DEFAULT, default=1)
+
+    def __str__(self):
+        return f'{self.tutor} - {self.student} - {self.vote}'
+
+    class Meta:
+        unique_together = ['student', 'tutor']

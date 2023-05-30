@@ -1,6 +1,7 @@
+from django.db import IntegrityError
 from rest_framework import serializers
 
-from users_app.models import User, Tutor, Student
+from users_app.models import User, Tutor, Student, Vote, VoteType
 from django.conf import settings
 
 from django.db.models.signals import post_save
@@ -122,8 +123,25 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class VoteForTutorSerializer(serializers.ModelSerializer):
+class VoteTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Student
+        model = VoteType
         fields = '__all__'
-        read_only_fields = ['user', ]
+        read_only_fields = ['student', 'tutor', ]
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Vote
+        fields = '__all__'
+        read_only_fields = ['student', 'tutor']
+
+    def create(self, validated_data):
+        try:
+            return super().create(validated_data)
+        except IntegrityError:
+            new_vote_type = validated_data.pop('vote')
+            instance = self.Meta.model.objects.get(**validated_data)
+            instance.vote = new_vote_type
+            instance.save()
+            return instance

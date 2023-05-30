@@ -1,14 +1,15 @@
 from rest_framework import generics, status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from courses_app.permissions import IsStudent
-from .models import User, Tutor, Student
+from .models import User, Tutor, Student, Vote, VoteType
 from .serializers import StudentRegisterSerializer, TutorRegisterSerializer, \
-    TutorSerializer, StudentSerializer, VoteForTutorSerializer
+    TutorSerializer, StudentSerializer, VoteSerializer, VoteTypeSerializer
 
 
 class UserStudentRegisterAPIView(generics.CreateAPIView):
@@ -23,13 +24,13 @@ class UserTutorRegisterAPIView(generics.CreateAPIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
 
 
-class TutorViewSet(generics.ListAPIView):
+class TutorListAPIView(generics.ListAPIView):
     queryset = Tutor.objects.all()
     serializer_class = TutorSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
 
 
-class StudentViewSet(generics.ListAPIView):
+class StudentListAPIView(generics.ListAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
@@ -41,22 +42,21 @@ class RegistrationTutorRequestAPIView(generics.CreateAPIView):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
 
 
-class VoteForTutorViewSet(ViewSet):
-    serializer_class = VoteForTutorSerializer
+class VoteTypeCreateAPIView(generics.CreateAPIView):
+    queryset = VoteType.objects.all()
+    serializer_class = VoteTypeSerializer
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAdminUser, ]
+
+
+class VoteCreateAPIView(generics.CreateAPIView):
+    queryset = Vote.objects.all()
+    serializer_class = VoteSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsStudent, ]
 
-    def create(self, request, *args, **kwargs):
-        student = self.get_student_object(request.user)
-        tutor_id = request.data.get('tutor_id')
-
-        if tutor_id is not None:
-            tutor = get_object_or_404(Tutor, id=tutor_id)
-            student.vote_for_tutor(tutor)
-            return Response(status=status.HTTP_200_OK)
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    def get_student_object(self, user):
-        student = get_object_or_404(Student, user=user)
-        return student
+    def perform_create(self, serializer):
+        serializer.save(
+            student=self.request.user.student,
+            tutor=get_object_or_404(Tutor, pk=self.kwargs['tutor'])
+        )

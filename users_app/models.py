@@ -15,8 +15,8 @@ class User(AbstractUser):
 
 
 class Tutor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    # students = models.ManyToManyField('Student', related_name='tutor_set', related_query_name='tutor', blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    students = models.ManyToManyField('Student', related_name='tutor_set', related_query_name='tutor', blank=True)
     experience = models.IntegerField()
 
     @staticmethod
@@ -40,7 +40,7 @@ class Tutor(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    tutors = models.ManyToManyField(Tutor, related_name='students')
+    tutors = models.ManyToManyField(Tutor, related_name='student_set', related_query_name='student', blank=True)
 
     @staticmethod
     def update_tutors(sender, instance, action, pk_set, **kwargs):

@@ -23,3 +23,17 @@ class IsStudent(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user.is_authenticated and hasattr(request.user, 'student')
+
+
+class IsAuthorStudentOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.student.user == request.user
+
+
+class IsAuthorTutorOrReadOnly(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.tutor.user == request.user

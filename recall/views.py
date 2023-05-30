@@ -9,14 +9,14 @@ from rest_framework.response import Response
 from recall.models import Comment
 from recall.serializers import CommentSerializer
 from users_app.models import Student, Tutor
-from courses_app.permissions import IsStudent
+from courses_app.permissions import IsStudent, IsAuthorStudentOrReadOnly
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsStudent, ]
+    permission_classes = [IsStudent, IsAuthorStudentOrReadOnly]
 
     def perform_create(self, serializer):
         student_id = self.request.data.get('student_id')

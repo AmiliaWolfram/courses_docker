@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from datetime import timedelta, datetime
+from datetime import timedelta
 from dateutil.parser import parse
 
 from users_app.models import Tutor, Student
@@ -42,7 +42,7 @@ class Course(models.Model):
         ]
     )
     tutor = models.ForeignKey(Tutor, on_delete=models.SET_NULL, null=True, blank=True)
-    students = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
+    students = models.ManyToManyField(Student, blank=True)
     date_started = models.DateTimeField()
     duration = models.IntegerField()
     date_ended = models.DateTimeField()

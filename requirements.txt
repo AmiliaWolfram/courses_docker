@@ -1,6 +1,7 @@
-django==3.2
+django==4.2
 djangorestframework
 Pillow
 
 django-cors-headers
 rest_framework_simplejwt
+python-dateutil
